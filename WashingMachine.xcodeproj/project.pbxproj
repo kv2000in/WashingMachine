@@ -6,10 +6,15 @@
 	objectVersion = 50;
 	objects = {
 
+/* Begin PBXFileReference section */
+		2A0879562F38585000546D19 /* ESP32WashingMachine.ino */ = {isa = PBXFileReference; lastKnownFileType = text; name = ESP32WashingMachine.ino; path = ESP32WashingMachine/ESP32WashingMachine.ino; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		2A08794F2F38579800546D19 = {
 			isa = PBXGroup;
 			children = (
+				2A0879562F38585000546D19 /* ESP32WashingMachine.ino */,
 			);
 			sourceTree = "<group>";
 		};
