@@ -6,8 +6,8 @@
 #include <ESPAsyncWebServer.h>
 
 // ---------------- WIFI ----------------
-const char* ssid = "a";
-const char* password = "a";
+const char* ssid = "nmb";
+const char* password = "kjh";
 
 
 // ---------------- PINS ----------------
@@ -281,6 +281,9 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
 
     if (msg == "stop") {
       stopWashCycle();
+    }
+        if (msg == "stopbuzzer") {
+      silenceBuzzer();
     }
   }
 }
