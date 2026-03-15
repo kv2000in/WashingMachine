@@ -6,8 +6,8 @@
 #include <ESPAsyncWebServer.h>
 
 // ---------------- WIFI ----------------
-const char* ssid = "nmb";
-const char* password = "kjh";
+const char* ssid = "dssdf";
+const char* password = "dsfs";
 
 
 // ---------------- PINS ----------------
@@ -258,33 +258,51 @@ void sendStatus(String msg) {
   ws.textAll(msg);
 }
 
+
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
 
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+
     data[len] = 0;
     String msg = (char*)data;
 
     Serial.println("WS received: " + msg);
 
-    if (msg == "start") {
+    if (msg == "START") {
       startWashCycle();
     }
 
-        if (msg == "testrelays") {
-            digitalWrite(relayMaster, HIGH);
-  digitalWrite(relayInterlock, HIGH); // select A
-  digitalWrite(relayDirA, HIGH);
-  digitalWrite(relayDirB, HIGH);
-      
-    }
-
-    if (msg == "stop") {
+    else if (msg == "STOP") {
       stopWashCycle();
     }
-        if (msg == "stopbuzzer") {
+
+    else if (msg == "SILENCE") {
       silenceBuzzer();
     }
+
+    else if (msg == "testrelays") {
+      digitalWrite(relayMaster, HIGH);
+      digitalWrite(relayInterlock, HIGH);
+      digitalWrite(relayDirA, HIGH);
+      digitalWrite(relayDirB, HIGH);
+    }
+
+    else if (msg.startsWith("WASHTIME:")) {
+
+      int minutes = msg.substring(9).toInt();
+
+      if (minutes >= 5 && minutes <= 60) {
+
+        totalWashTime = (unsigned long)minutes * 60UL * 1000UL;
+
+        Serial.print("Wash time set to: ");
+        Serial.print(minutes);
+        Serial.println(" minutes");
+      }
+    }
+
   }
 }
 

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+			<title>Washer Controller</title>
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+				
+				<style>
+					
+					body{
+						font-family:system-ui,Arial;
+						background:#0b0b0b;
+						color:white;
+						margin:0;
+						text-align:center;
+					}
+				
+				header{
+					background:#121212;
+					padding:18px;
+					font-size:22px;
+					font-weight:600;
+				}
+				
+				.container{
+					padding:20px;
+					max-width:420px;
+					margin:auto;
+				}
+				
+				.card{
+					background:#171717;
+					border-radius:10px;
+					padding:16px;
+					margin-bottom:20px;
+				}
+				
+				.statusRow{
+					display:flex;
+					justify-content:center;
+					align-items:center;
+					gap:10px;
+					margin-bottom:12px;
+					font-size:18px;
+				}
+				
+				.light{
+					width:18px;
+					height:18px;
+					border-radius:50%;
+					background:red;
+				}
+				
+				button{
+					width:100%;
+					padding:16px;
+					margin:8px 0;
+					font-size:18px;
+					border-radius:8px;
+					border:none;
+					cursor:pointer;
+				}
+				
+				button:disabled{
+					opacity:.35;
+				}
+				
+				.connect{background:#1f7cff;color:white;}
+				.start{background:#2ecc71;color:black;}
+				.stop{background:#e74c3c;color:white;}
+				.silence{background:#f1c40f;color:black;}
+				
+				input{
+					width:100%;
+					padding:12px;
+					font-size:18px;
+					margin-top:8px;
+					border-radius:6px;
+					border:none;
+				}
+				
+				.statusText{
+					margin-top:6px;
+					font-size:18px;
+				}
+				
+				.timer{
+					font-size:34px;
+					margin-top:10px;
+					letter-spacing:1px;
+				}
+				
+					</style>
+				
+	</head>
+	
+	<body>
+		
+		<header>
+			ESP32 Washer Controller
+		</header>
+		
+		<div class="container">
+			
+			<div class="card">
+				
+				<div class="statusRow">
+					Connection
+					<div id="statusLight" class="light"></div>
+				</div>
+				
+				<button id="connectBtn" class="connect">Connect to Washer</button>
+				
+				<div class="statusText">
+					Status: <span id="machineStatus">DISCONNECTED</span>
+				</div>
+				
+				<div id="countdown" class="timer">--:--</div>
+				
+			</div>
+			
+			<div class="card">
+				
+				<label>Wash Time (minutes)</label>
+				
+				<input id="washTime" list="times" placeholder="15-30">
+					
+					<datalist id="times">
+						<option value="15"></option>
+						<option value="20"></option>
+						<option value="25"></option>
+						<option value="30"></option>
+					</datalist>
+					
+			</div>
+			
+			<div class="card">
+				
+				<button id="startBtn" class="start" disabled>START WASH</button> <button id="stopBtn" class="stop" disabled>STOP</button> <button id="silenceBtn" class="silence">SILENCE BUZZER</button>
+				
+			</div>
+			
+		</div>
+		
+		<script>
+			
+			const ESP32_IP = "192.168.1.254";
+			
+			let ws = null;
+			let connected = false;
+			
+			const statusLight = document.getElementById("statusLight");
+			const connectBtn = document.getElementById("connectBtn");
+			
+			const startBtn = document.getElementById("startBtn");
+			const stopBtn = document.getElementById("stopBtn");
+			const silenceBtn = document.getElementById("silenceBtn");
+			
+			const washTimeInput = document.getElementById("washTime");
+			
+			const machineStatus = document.getElementById("machineStatus");
+			const countdownLabel = document.getElementById("countdown");
+			
+			let cycleSeconds = 0;
+			let timerInterval = null;
+			
+			function setConnected(state){
+				
+				connected = state;
+				
+				if(state){
+					statusLight.style.background = "lime";
+					connectBtn.style.display = "none";
+					machineStatus.textContent = "CONNECTED";
+				}
+				else{
+					statusLight.style.background = "red";
+					connectBtn.style.display = "block";
+					machineStatus.textContent = "DISCONNECTED";
+					stopTimer();
+				}
+				
+			}
+		
+		function connectWebSocket(){
+			
+			ws = new WebSocket("ws://" + ESP32_IP + "/ws");
+			
+			ws.onopen = function(){
+				setConnected(true);
+			};
+			
+			ws.onclose = function(){
+				setConnected(false);
+			};
+			
+			ws.onerror = function(){
+				setConnected(false);
+			};
+			
+			ws.onmessage = function(event){
+				handleStatus(event.data);
+			};
+			
+		}
+		
+		function sendCommand(cmd){
+			
+			if(ws && ws.readyState === 1){
+				ws.send(cmd);
+			}
+			
+		}
+		
+		function handleStatus(msg){
+			
+			console.log("Status:",msg);
+			
+			if(msg === "WASH_START"){
+				
+				machineStatus.textContent = "WASHING";
+				
+				startBtn.disabled = true;
+				stopBtn.disabled = false;
+				
+				startTimer();
+			}
+			
+			if(msg === "WASH_STOP"){
+				
+				machineStatus.textContent = "STOPPED";
+				
+				stopBtn.disabled = true;
+				startBtn.disabled = false;
+				
+				stopTimer();
+			}
+			
+			if(msg === "TANK_FULL"){
+				machineStatus.textContent = "TANK FULL";
+			}
+			
+			if(msg === "TANK_EMPTY"){
+				machineStatus.textContent = "TANK EMPTY";
+			}
+			
+		}
+		
+		function startTimer(){
+			
+			cycleSeconds = parseInt(washTimeInput.value) * 60;
+			
+			timerInterval = setInterval(function(){
+										
+										cycleSeconds--;
+										
+										let minutes = Math.floor(cycleSeconds / 60);
+										let seconds = cycleSeconds % 60;
+										
+										countdownLabel.textContent =
+										String(minutes).padStart(2,"0") + ":" +
+										String(seconds).padStart(2,"0");
+										
+										if(cycleSeconds <= 0){
+										stopTimer();
+										}
+										
+										},1000);
+										
+		}
+		
+		function stopTimer(){
+			
+			clearInterval(timerInterval);
+			countdownLabel.textContent = "--:--";
+			
+		}
+		
+		washTimeInput.addEventListener("input",function(){
+									   
+									   let value = parseInt(washTimeInput.value);
+									   
+									   if(value > 0){
+									   
+									   startBtn.disabled = false;
+									   
+									   sendCommand("WASHTIME:" + value);
+									   
+									   }
+									   else{
+									   
+									   startBtn.disabled = true;
+									   
+									   }
+									   
+									   });
+									   
+									   connectBtn.addEventListener("click",function(){
+																   connectWebSocket();
+																   });
+																   
+																   startBtn.addEventListener("click",function(){
+																							 sendCommand("START");
+																							 });
+																							 
+																							 stopBtn.addEventListener("click",function(){
+																													  sendCommand("STOP");
+																													  });
+																													  
+																													  silenceBtn.addEventListener("click",function(){
+																																				  sendCommand("SILENCE");
+																																				  });
+																																				  
+																																				  setConnected(false);
+																																				  
+			</script>
+		
+	</body>
+</html>
+
