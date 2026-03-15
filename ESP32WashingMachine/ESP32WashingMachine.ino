@@ -6,8 +6,8 @@
 #include <ESPAsyncWebServer.h>
 
 // ---------------- WIFI ----------------
-const char* ssid = "ds";
-const char* password = "ads";
+const char* ssid = "asd";
+const char* password = "asd";
 
 
 // ---------------- PINS ----------------
@@ -50,6 +50,7 @@ unsigned long dirATime = 4000;
 unsigned long dirBTime = 4000;
 unsigned long pauseTime = 2000;
 unsigned long totalWashTime = 5 * 60 * 1000; // 5 minutes
+unsigned long timeRemaining;
 
 unsigned long washStartTime = 0;
 
@@ -162,6 +163,10 @@ void startWashCycle() {
   setDirectionA();
 
   sendStatus("WASH_START");
+    timeRemaining = totalWashTime-(millis()-washStartTime);
+   char buffer[50];
+sprintf(buffer, "WASH_WASHING: %d - %d ", totalWashTime, timeRemaining);
+sendStatus(String(buffer)); 
 }
 
 void stopWashCycle() {
@@ -317,9 +322,13 @@ void onEvent(AsyncWebSocket * server,
   switch (type) {
     case WS_EVT_CONNECT:
       Serial.printf("WS client #%u connected\n", client->id());
- char buffer[50];
-sprintf(buffer, "Wash time set to: %d msecs", totalWashTime);
+
+if (not (washState == IDLE || washState == COMPLETE)){
+  timeRemaining = totalWashTime-(millis()-washStartTime);
+   char buffer[50];
+sprintf(buffer, "WASH_WASHING: %d - %d ", totalWashTime, timeRemaining);
 sendStatus(String(buffer)); 
+  };
       break;
 
     case WS_EVT_DISCONNECT:

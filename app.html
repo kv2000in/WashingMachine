@@ -126,8 +126,7 @@
 			<div class="card">
 				
 				<label>Wash Time (minutes)</label>
-				
-				<input id="washTime" list="times" placeholder="15-30">
+				<input id="washTime" list="times" value="15" placeholder="15-30">
 					
 					<datalist id="times">
 						<option value="15"></option>
@@ -140,7 +139,7 @@
 			
 			<div class="card">
 				
-				<button id="startBtn" class="start" disabled>START WASH</button> <button id="stopBtn" class="stop" disabled>STOP</button> <button id="silenceBtn" class="silence">SILENCE BUZZER</button>
+				<button id="startBtn" class="start">START WASH</button> <button id="stopBtn" class="stop" disabled>STOP</button> <button id="silenceBtn" class="silence">SILENCE BUZZER</button>
 				
 			</div>
 			
@@ -229,6 +228,8 @@
 				
 				startTimer();
 			}
+			WASH_WASHING: 60000 - 49532
+			
 			
 			if(msg === "WASH_STOP"){
 				
@@ -248,7 +249,25 @@
 				
 				stopTimer();
 			}
-			
+			if (msg.startsWith("WASH_WASHING")) {
+				
+				const parts = msg.split(":")[1].split("-");
+				
+				const totalMs = parseInt(parts[0].trim());
+				const remainingMs = parseInt(parts[1].trim());
+				
+				const totalMinutes = Math.round(totalMs / 60000);
+				const remainingSeconds = Math.floor(remainingMs / 1000);
+				
+				machineStatus.textContent = "WASHING";
+				
+				startBtn.disabled = true;
+				stopBtn.disabled = false;
+				
+				washTimeInput.value = totalMinutes;
+				
+				startTimerFromRemaining(remainingSeconds);
+			}
 			if(msg === "TANK_FULL"){
 				machineStatus.textContent = "TANK FULL";
 			}
@@ -287,6 +306,31 @@
 			clearInterval(timerInterval);
 			countdownLabel.textContent = "--:--";
 			
+		}
+		
+		function startTimerFromRemaining(seconds){
+			
+			stopTimer();
+			
+			cycleSeconds = seconds;
+			
+			timerInterval = setInterval(function(){
+										
+										cycleSeconds--;
+										
+										let m = Math.floor(cycleSeconds / 60);
+										let s = cycleSeconds % 60;
+										
+										countdownLabel.textContent =
+										String(m).padStart(2,"0") + ":" +
+										String(s).padStart(2,"0");
+										
+										if(cycleSeconds <= 0){
+										stopTimer();
+										}
+										
+										},1000);
+										
 		}
 		
 		washTimeInput.addEventListener("input",function(){
