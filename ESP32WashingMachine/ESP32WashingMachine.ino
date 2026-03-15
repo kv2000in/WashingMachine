@@ -6,8 +6,8 @@
 #include <ESPAsyncWebServer.h>
 
 // ---------------- WIFI ----------------
-const char* ssid = "dssdf";
-const char* password = "dsfs";
+const char* ssid = "ds";
+const char* password = "ads";
 
 
 // ---------------- PINS ----------------
@@ -171,7 +171,7 @@ void stopWashCycle() {
 }
 
 void updateWashCycle() {
-  if (washState == IDLE) return;
+  if (washState == IDLE || washState == COMPLETE) return;
 
   unsigned long now = millis();
 
@@ -293,13 +293,14 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
 
       int minutes = msg.substring(9).toInt();
 
-      if (minutes >= 5 && minutes <= 60) {
+      if (minutes >= 1 && minutes <= 60) {
 
         totalWashTime = (unsigned long)minutes * 60UL * 1000UL;
 
-        Serial.print("Wash time set to: ");
-        Serial.print(minutes);
-        Serial.println(" minutes");
+
+ char buffer[50];
+sprintf(buffer, "Wash time set to: %d msecs", totalWashTime);
+sendStatus(String(buffer));
       }
     }
 
@@ -316,6 +317,9 @@ void onEvent(AsyncWebSocket * server,
   switch (type) {
     case WS_EVT_CONNECT:
       Serial.printf("WS client #%u connected\n", client->id());
+ char buffer[50];
+sprintf(buffer, "Wash time set to: %d msecs", totalWashTime);
+sendStatus(String(buffer)); 
       break;
 
     case WS_EVT_DISCONNECT:

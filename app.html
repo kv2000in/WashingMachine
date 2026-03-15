@@ -239,6 +239,15 @@
 				
 				stopTimer();
 			}
+			if(msg === "WASH_COMPLETE"){
+				
+				machineStatus.textContent = "COMPLETED";
+				
+				stopBtn.disabled = true;
+				startBtn.disabled = false;
+				
+				stopTimer();
+			}
 			
 			if(msg === "TANK_FULL"){
 				machineStatus.textContent = "TANK FULL";
