@@ -8,6 +8,9 @@
 
 /* Begin PBXFileReference section */
 		2A0879562F38585000546D19 /* ESP32WashingMachine.ino */ = {isa = PBXFileReference; lastKnownFileType = text; name = ESP32WashingMachine.ino; path = ESP32WashingMachine/ESP32WashingMachine.ino; sourceTree = "<group>"; };
+		2A4739942F703DAD00B4DD23 /* sw.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = sw.js; sourceTree = "<group>"; };
+		2A4739952F703E3900B4DD23 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
+		2A4739962F70415300B4DD23 /* icon-512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-512.png"; sourceTree = "<group>"; };
 		2ABDFA182F66420300BB8278 /* app.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = app.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -15,6 +18,9 @@
 		2A08794F2F38579800546D19 = {
 			isa = PBXGroup;
 			children = (
+				2A4739962F70415300B4DD23 /* icon-512.png */,
+				2A4739952F703E3900B4DD23 /* manifest.json */,
+				2A4739942F703DAD00B4DD23 /* sw.js */,
 				2ABDFA182F66420300BB8278 /* app.html */,
 				2A0879562F38585000546D19 /* ESP32WashingMachine.ino */,
 			);
