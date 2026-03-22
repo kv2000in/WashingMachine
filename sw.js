@@ -10,6 +10,7 @@ const APP_STATIC_RESOURCES = [
 							  "./app.html",
 							  "./manifest.json",
 							  "./sw.js",
+							  "./icon-512.png",
 							  ];
 
 
