@@ -71,8 +71,8 @@ bCeCOOg=
 
 
 // ---------------- WIFI ----------------
-const char* ssid = "sad";
-const char* password = "ads";
+const char* ssid = "asdf";
+const char* password = "asd";
 
 
 // ---------------- PINS ----------------

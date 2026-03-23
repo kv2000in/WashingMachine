@@ -125,6 +125,8 @@
 			<div class="card">
 				
 				<div class="statusRow">
+					<label>IP Address</label>
+					<input id="esp32ipaddr" value="192.168.1.254">
 					Connection
 					<div id="statusLight" class="light"></div>
 				</div>
@@ -163,7 +165,7 @@
 		
 		<script>
 			
-			const ESP32_IP = "192.168.1.254";
+			const ESP32_IP = document.getElementById("esp32ipaddr").value;
 			
 			let ws = null;
 			let connected = false;
@@ -203,7 +205,7 @@
 		
 		function connectWebSocket(){
 			
-			ws = new WebSocket("ws://" + ESP32_IP + "/ws");
+			ws = new WebSocket("wss://" + ESP32_IP + "/ws");
 			
 			ws.onopen = function(){
 				setConnected(true);
