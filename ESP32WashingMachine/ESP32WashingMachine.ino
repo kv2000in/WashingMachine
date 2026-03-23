@@ -71,8 +71,8 @@ bCeCOOg=
 
 
 // ---------------- WIFI ----------------
-const char* ssid = "asdf";
-const char* password = "asd";
+const char* ssid = "fsd";
+const char* password = "dsa";
 
 
 // ---------------- PINS ----------------
@@ -218,7 +218,7 @@ void checkLevelSensor() {
 }
 
 void updateBuzzer() {
-  if (tankFull && !buzzerSilenced) {
+  if ((washState == IDLE || washState == COMPLETE) && tankFull && !buzzerSilenced) {
     digitalWrite(buzzerPin, HIGH);
   } else {
     digitalWrite(buzzerPin, LOW);
