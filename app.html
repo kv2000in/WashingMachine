@@ -421,6 +421,44 @@
 														   
 			
 			
+			
+			let wakeLock = null;
+			
+				// Request wake lock
+				const requestWakeLock = async () => {
+					try {
+						wakeLock = await navigator.wakeLock.request('screen');
+						console.log('Wake Lock is active');
+						
+						wakeLock.addEventListener('release', () => {
+												  console.log('Wake Lock was released');
+												  wakeLock = null;
+												  });
+												  
+					} catch (err) {
+						console.error(`${err.name}, ${err.message}`);
+					}
+				};
+		
+			// Handle visibility change (MOST IMPORTANT)
+			document.addEventListener('visibilitychange', async () => {
+									  if (document.visibilityState === 'visible' && wakeLock === null) {
+									  console.log('Reacquiring wake lock...');
+									  await requestWakeLock();
+									  }
+									  });
+									  
+										  // Handle window focus (secondary safety)
+										  window.addEventListener('focus', async () => {
+																  if (wakeLock === null) {
+																  console.log('Window focused, reacquiring wake lock...');
+																  await requestWakeLock();
+																  }
+																  });
+																  
+																	  // Initial request
+																	  requestWakeLock();
+			
 			</script>
 		
 		
